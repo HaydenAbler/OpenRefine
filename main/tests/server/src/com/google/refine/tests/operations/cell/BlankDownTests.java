@@ -2,22 +2,32 @@ package com.google.refine.tests.operations.cell;
 
 import java.util.Properties;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import com.google.refine.ProjectManager;
+import com.google.refine.browsing.EngineConfig;
 import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Project;
+import com.google.refine.operations.OperationRegistry;
 import com.google.refine.operations.cell.BlankDownOperation;
 import com.google.refine.process.Process;
 import com.google.refine.tests.RefineTest;
+import com.google.refine.tests.util.TestUtils;
 
 public class BlankDownTests extends RefineTest {
     
     Project project = null;
+    
+    @BeforeSuite
+    public void registerOperation() {
+        OperationRegistry.registerOperation(getCoreModule(), "blank-down", BlankDownOperation.class);
+    }
     
     @BeforeMethod
     public void setUp() {
@@ -35,9 +45,19 @@ public class BlankDownTests extends RefineTest {
     }
     
     @Test
+    public void serializeBlankDownOperation() throws JSONException, Exception {
+        String json = "{\"op\":\"core/blank-down\","
+                + "\"description\":\"Blank down cells in column my column\","
+                + "\"engineConfig\":{\"mode\":\"record-based\",\"facets\":[]},"
+                + "\"columnName\":\"my column\"}";
+        AbstractOperation op = BlankDownOperation.reconstruct(project, new JSONObject(json));
+        TestUtils.isSerializedTo(op, json);
+    }
+    
+    @Test
     public void testBlankDownRecords() throws Exception {
         AbstractOperation op = new BlankDownOperation(
-                new JSONObject("{\"mode\":\"record-based\",\"facets\":[]}"),
+                EngineConfig.reconstruct(new JSONObject("{\"mode\":\"record-based\",\"facets\":[]}")),
                 "second");
         Process process = op.createProcess(project, new Properties());
         process.performImmediate();
@@ -51,7 +71,7 @@ public class BlankDownTests extends RefineTest {
     @Test
     public void testBlankDownRows() throws Exception {
         AbstractOperation op = new BlankDownOperation(
-                new JSONObject("{\"mode\":\"row-based\",\"facets\":[]}"),
+                EngineConfig.reconstruct(new JSONObject("{\"mode\":\"row-based\",\"facets\":[]}")),
                 "second");
         Process process = op.createProcess(project, new Properties());
         process.performImmediate();

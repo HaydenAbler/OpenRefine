@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-package com.google.refine.tests.recon;
+package com.google.refine.tests.operations.recon;
 
 import static org.mockito.Mockito.mock;
 
@@ -50,6 +50,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.refine.browsing.Engine;
+import com.google.refine.browsing.EngineConfig;
 import com.google.refine.model.Cell;
 import com.google.refine.model.ModelException;
 import com.google.refine.model.Project;
@@ -59,11 +60,13 @@ import com.google.refine.model.Row;
 import com.google.refine.process.Process;
 import com.google.refine.process.ProcessManager;
 import com.google.refine.operations.EngineDependentOperation;
+import com.google.refine.operations.OperationRegistry;
 import com.google.refine.operations.recon.ExtendDataOperation;
 import com.google.refine.tests.RefineTest;
+import com.google.refine.tests.util.TestUtils;
 
 
-public class DataExtensionTests extends RefineTest {
+public class ExtendDataOperationTests extends RefineTest {
 
     static final String ENGINE_JSON_URLS = "{\"mode\":\"row-based\"}}";
     static final String RECON_SERVICE = "https://tools.wmflabs.org/openrefine-wikidata/en/api";
@@ -79,17 +82,18 @@ public class DataExtensionTests extends RefineTest {
     // dependencies
     Project project;
     Properties options;
-    JSONObject engine_config;
+    EngineConfig engine_config;
     Engine engine;
 
     @BeforeMethod
     public void SetUp() throws JSONException, IOException, ModelException {
+        OperationRegistry.registerOperation(getCoreModule(), "extend-reconciled-data", ExtendDataOperation.class);
         project = createProjectWithColumns("DataExtensionTests", "country");
         
         options = mock(Properties.class);
         engine = new Engine(project);
-        engine_config = new JSONObject(ENGINE_JSON_URLS);
-        engine.initializeFromJSON(engine_config);
+        engine_config = EngineConfig.reconstruct(new JSONObject(ENGINE_JSON_URLS));
+        engine.initializeFromConfig(engine_config);
         engine.setMode(Engine.Mode.RowBased);
 
                Row row = new Row(2);
@@ -104,6 +108,29 @@ public class DataExtensionTests extends RefineTest {
         row = new Row(2);
         row.setCell(0, reconciledCell("United States of America", "Q30"));
         project.rows.add(row);
+    }
+    
+    @Test
+    public void serializeExtendDataOperation() throws JSONException, Exception {
+        String json = "{\"op\":\"core/extend-reconciled-data\","
+                + "\"description\":\"Extend data at index 3 based on column organization_name\","
+                + "\"engineConfig\":{\"mode\":\"row-based\",\"facets\":["
+                + "    {\"selectNumeric\":true,\"expression\":\"cell.recon.best.score\",\"selectBlank\":false,\"selectNonNumeric\":true,\"selectError\":true,\"name\":\"organization_name: best candidate's score\",\"from\":13,\"to\":101,\"type\":\"range\",\"columnName\":\"organization_name\"},"
+                + "    {\"selectNonTime\":true,\"expression\":\"grel:toDate(value)\",\"selectBlank\":true,\"selectError\":true,\"selectTime\":true,\"name\":\"start_year\",\"from\":410242968000,\"to\":1262309184000,\"type\":\"timerange\",\"columnName\":\"start_year\"}"
+                + "]},"
+                + "\"columnInsertIndex\":3,"
+                + "\"baseColumnName\":\"organization_name\","
+                + "\"endpoint\":\"https://tools.wmflabs.org/openrefine-wikidata/en/api\","
+                + "\"identifierSpace\":\"http://www.wikidata.org/entity/\","
+                + "\"schemaSpace\":\"http://www.wikidata.org/prop/direct/\","
+                + "\"extension\":{"
+                + "    \"properties\":["
+                + "        {\"name\":\"inception\",\"id\":\"P571\"},"
+                + "        {\"name\":\"headquarters location\",\"id\":\"P159\"},"
+                + "        {\"name\":\"coordinate location\",\"id\":\"P625\"}"
+                + "     ]"
+                + "}}";
+        TestUtils.isSerializedTo(ExtendDataOperation.reconstruct(project, new JSONObject(json)), json);
     }
 
     @AfterMethod

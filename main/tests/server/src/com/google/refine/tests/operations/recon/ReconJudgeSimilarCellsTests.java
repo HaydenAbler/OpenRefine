@@ -1,4 +1,4 @@
-package com.google.refine.tests.operations.cell;
+package com.google.refine.tests.operations.recon;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.google.refine.browsing.EngineConfig;
 import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
@@ -18,18 +19,38 @@ import com.google.refine.model.Project;
 import com.google.refine.model.Recon;
 import com.google.refine.model.recon.ReconConfig;
 import com.google.refine.model.recon.StandardReconConfig;
+import com.google.refine.operations.OperationRegistry;
 import com.google.refine.operations.recon.ReconJudgeSimilarCellsOperation;
 import com.google.refine.process.Process;
 import com.google.refine.tests.RefineTest;
+import com.google.refine.tests.util.TestUtils;
 
 public class ReconJudgeSimilarCellsTests extends RefineTest {
     
-    static final JSONObject ENGINE_CONFIG = new JSONObject("{\"mode\":\"row-based\"}}");
+    static final EngineConfig ENGINE_CONFIG = EngineConfig.reconstruct(new JSONObject("{\"mode\":\"row-based\"}}"));
     
     @Override
     @BeforeTest
     public void init() {
         logger = LoggerFactory.getLogger(this.getClass());
+        OperationRegistry.registerOperation(getCoreModule(), "recon-judge-similar-cells", ReconJudgeSimilarCellsOperation.class);
+    }
+    
+    @Test
+    public void serializeReconJudgeSimilarCellsOperation() {
+        AbstractOperation op = new ReconJudgeSimilarCellsOperation(
+                ENGINE_CONFIG,
+                "A",
+                "foo",
+                Recon.Judgment.New,
+                null, true);
+        TestUtils.isSerializedTo(op, "{\"op\":\"core/recon-judge-similar-cells\","
+                + "\"description\":\"Mark to create one single new item for all cells containing \\\"foo\\\" in column A\","
+                + "\"engineConfig\":{\"mode\":\"row-based\",\"facets\":[]},"
+                + "\"columnName\":\"A\","
+                + "\"similarValue\":\"foo\","
+                + "\"judgment\":\"new\","
+                + "\"shareNewTopics\":true}");
     }
     
     @Test

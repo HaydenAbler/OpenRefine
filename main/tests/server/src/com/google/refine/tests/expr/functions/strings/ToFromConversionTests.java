@@ -123,7 +123,6 @@ public class ToFromConversionTests extends RefineTest {
       Assert.assertEquals(invoke("toString", CalendarParser.parseAsOffsetDateTime(inputDate), "yyyy-MM-dd"),
               "2013-06-01");
       Assert.assertEquals(invoke("toString", CalendarParser.parseAsOffsetDateTime(inputDate), "yyyy/dd/MM"), "2013/01/06");
-      Assert.assertEquals(invoke("toString", CalendarParser.parseAsOffsetDateTime(inputDate), "yyyy-MMM"), "2013-Jun");
       Assert.assertEquals(invoke("toString", CalendarParser.parseAsOffsetDateTime(inputDate), "yyyy-MM-dd hh:mm:ss"), "2013-06-01 12:00:00");
       
       String inputDateTime = "2013-06-01 13:12:11";
@@ -177,5 +176,11 @@ public class ToFromConversionTests extends RefineTest {
       Assert.assertEquals(invoke("escape", Double.parseDouble("1.23"), "url"),"1.23");
       Assert.assertEquals(invoke("escape", Double.parseDouble("1.23"), "javascript"),"1.23");
    }
+    
+    @Test
+    public void testUnescape() {
+        Assert.assertEquals(invoke("unescape", "&Auml;", "html"),"Ä");
+        Assert.assertEquals(invoke("unescape", "\\u00C4", "javascript"),"Ä");
+    }
 
 }

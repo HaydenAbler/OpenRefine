@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-package com.google.refine.tests.model;
+package com.google.refine.tests.operations.column;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -46,6 +46,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.google.refine.browsing.EngineConfig;
 import com.google.refine.expr.ExpressionUtils;
 import com.google.refine.model.Cell;
 import com.google.refine.model.ModelException;
@@ -53,26 +54,29 @@ import com.google.refine.model.Project;
 import com.google.refine.model.Row;
 import com.google.refine.operations.EngineDependentOperation;
 import com.google.refine.operations.OnError;
+import com.google.refine.operations.OperationRegistry;
 import com.google.refine.operations.column.ColumnAdditionByFetchingURLsOperation;
 import com.google.refine.process.Process;
 import com.google.refine.process.ProcessManager;
 import com.google.refine.tests.RefineTest;
+import com.google.refine.tests.util.TestUtils;
 
 
-public class UrlFetchingTests extends RefineTest {
+public class ColumnAdditionByFetchingURLsOperationTests extends RefineTest {
 
-    static final String ENGINE_JSON_URLS = "{\"mode\":\"row-based\"}}";
+    static final String ENGINE_JSON_URLS = "{\"mode\":\"row-based\"}";
 
     @Override
     @BeforeTest
     public void init() {
         logger = LoggerFactory.getLogger(this.getClass());
+        OperationRegistry.registerOperation(getCoreModule(), "column-addition-by-fetching-urls", ColumnAdditionByFetchingURLsOperation.class);
     }
 
     // dependencies
     private Project project;
     private Properties options;
-    private JSONObject engine_config;
+    private EngineConfig engine_config = EngineConfig.reconstruct(new JSONObject(ENGINE_JSON_URLS));
 
     @BeforeMethod
     public void SetUp() throws JSONException, IOException, ModelException {
@@ -89,6 +93,26 @@ public class UrlFetchingTests extends RefineTest {
         }
 
         return state;
+    }
+    
+    @Test
+    public void serializeColumnAdditionByFetchingURLsOperation() throws JSONException, Exception {
+        String json = "{\"op\":\"core/column-addition-by-fetching-urls\","
+                + "\"description\":\"Create column employments at index 2 by fetching URLs based on column orcid using expression grel:\\\"https://pub.orcid.org/\\\"+value+\\\"/employments\\\"\","
+                + "\"engineConfig\":{\"mode\":\"row-based\",\"facets\":[]},"
+                + "\"newColumnName\":\"employments\","
+                + "\"columnInsertIndex\":2,"
+                + "\"baseColumnName\":\"orcid\","
+                + "\"urlExpression\":\"grel:\\\"https://pub.orcid.org/\\\"+value+\\\"/employments\\\"\","
+                + "\"onError\":\"set-to-blank\","
+                + "\"delay\":500,"
+                + "\"cacheResponses\":true,"
+                + "\"httpHeadersJson\":["
+                + "    {\"name\":\"authorization\",\"value\":\"\"},"
+                + "    {\"name\":\"user-agent\",\"value\":\"OpenRefine 3.0 rc.1 [TRUNK]\"},"
+                + "    {\"name\":\"accept\",\"value\":\"application/json\"}"
+                + "]}";
+        TestUtils.isSerializedTo(ColumnAdditionByFetchingURLsOperation.reconstruct(project, new JSONObject(json)), json);
     }
     
     /**
