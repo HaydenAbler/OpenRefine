@@ -36,6 +36,7 @@ package com.google.refine.tests.importers;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
 import java.io.StringReader;
 
 import org.json.JSONException;
@@ -512,6 +513,21 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(0).value, "data1");
         Assert.assertEquals(project.rows.get(0).cells.get(1).value, "data2");
         Assert.assertEquals(project.rows.get(0).cells.get(2).value, "data3");
+    }
+    
+    
+    //---------------------util tests------------------------
+    
+    @Test
+    public void guessIgnoreQuotes()     {
+        File file = new File(this.getClass().getClassLoader().getResource("ignoresQuotes.csv").getFile());
+        Assert.assertEquals(SeparatorBasedImporter.guessQuotes(file,"UTF-8"), false);
+    }
+    
+    @Test
+    public void guessSeperator()     {
+        File file = new File(this.getClass().getClassLoader().getResource("ignoresQuotes.csv").getFile());
+        Assert.assertEquals(SeparatorBasedImporter.guessSeparator(file,"UTF-8",false).separator, ',');
     }
     
     //---------------------read tests------------------------
