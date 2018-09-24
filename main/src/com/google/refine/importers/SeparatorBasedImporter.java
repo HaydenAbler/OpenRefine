@@ -67,14 +67,16 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
     public SeparatorBasedImporter() {
         super(false);
     }
-
+    
+    public static final boolean IGNORE_QUOTES = false;
+    
     @Override
     public JSONObject createParserUIInitializationData(ImportingJob job, List<JSONObject> fileRecords, String format) {
         JSONObject options = super.createParserUIInitializationData(job, fileRecords, format);
 
-        String separator = guessSeparator(job, fileRecords);
         boolean quotes = guessQuotes(job, fileRecords);
-
+        String separator = guessSeparator(job, fileRecords, quotes);
+        
         JSONUtilities.safePut(options, "separator", separator != null ? separator : "\\t");
         JSONUtilities.safePut(options, "guessCellValueTypes", false);
         JSONUtilities.safePut(options, "processQuotes", quotes);
@@ -153,7 +155,7 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
     }
 
     static public boolean guessQuotes(File file, String encoding) {
-        boolean quotes = true;
+        boolean quotes = !IGNORE_QUOTES;
         try {
             InputStream is = new FileInputStream(file);
             Reader reader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
@@ -191,7 +193,7 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
                     if (totalQuotes % 2 == 0) {
                         totalQuotes = 0;
                     } else {
-                        quotes = false;
+                        quotes = IGNORE_QUOTES;
                         break;
                     }
                 }
@@ -211,7 +213,7 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
         return quotes;
     }
 
-    static public String guessSeparator(ImportingJob job, List<JSONObject> fileRecords) {
+    static public String guessSeparator(ImportingJob job, List<JSONObject> fileRecords, boolean quotes) {
         for (int i = 0; i < 5 && i < fileRecords.size(); i++) {
             JSONObject fileRecord = fileRecords.get(i);
             String encoding = ImportingUtilities.getEncoding(fileRecord);
@@ -220,7 +222,7 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
             if (location != null) {
                 File file = new File(job.getRawDataDir(), location);
                 // Quotes are turned on by default, so use that for guessing
-                Separator separator = guessSeparator(file, encoding, true);
+                Separator separator = guessSeparator(file, encoding, quotes);
                 if (separator != null) {
                     return StringEscapeUtils.escapeJava(Character.toString(separator.separator));
                 }

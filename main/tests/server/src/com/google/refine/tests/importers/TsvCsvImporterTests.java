@@ -521,7 +521,7 @@ public class TsvCsvImporterTests extends ImporterTest {
     @Test
     public void guessIgnoreQuotes()     {
         File file = new File(this.getClass().getClassLoader().getResource("ignoresQuotes.csv").getFile());
-        Assert.assertEquals(SeparatorBasedImporter.guessQuotes(file,"UTF-8"), false);
+        Assert.assertEquals(SeparatorBasedImporter.guessQuotes(file,"UTF-8"), SeparatorBasedImporter.IGNORE_QUOTES);
     }
     
     @Test
