@@ -56,6 +56,11 @@ public class HtmlTableExporter implements WriterExporter {
     public void export(final Project project, Properties params, Engine engine, final Writer writer)
         throws IOException {
         
+        final boolean printColumnHeader =
+                (params != null && params.getProperty("printColumnHeader") != null) ?
+                    Boolean.parseBoolean(params.getProperty("printColumnHeader")) :
+                    true;
+        
         TabularSerializer serializer = new TabularSerializer() {
             @Override
             public void startFile(JSONObject options) {
@@ -88,35 +93,37 @@ public class HtmlTableExporter implements WriterExporter {
 
             @Override
             public void addRow(List<CellData> cells, boolean isHeader) {
-                try {
-                    writer.write("<tr>");
-                    if (isHeader) {
-                        for (CellData cellData : cells) {
-                            writer.write("<th>");
-                            writer.write((cellData != null && cellData.text != null) ? cellData.text : "");
-                            writer.write("</th>");
-                        }
-                    } else {
-                        for (CellData cellData : cells) {
-                            writer.write("<td>");
-                            if (cellData != null && cellData.text != null) {
-                                if (cellData.link != null) {
-                                    writer.write("<a href=\"");
-                                    // TODO: The escape below looks wrong, but is probably harmless in most cases
-                                    writer.write(StringEscapeUtils.escapeHtml4(cellData.link));
-                                    writer.write("\">");
-                                }
-                                writer.write(StringEscapeUtils.escapeXml(cellData.text));
-                                if (cellData.link != null) {
-                                    writer.write("</a>");
-                                }
+                if(!(!printColumnHeader && isHeader)) {
+                    try {
+                        writer.write("<tr>");
+                        if (isHeader) {
+                            for (CellData cellData : cells) {
+                                writer.write("<th>");
+                                writer.write((cellData != null && cellData.text != null) ? cellData.text : "");
+                                writer.write("</th>");
                             }
-                            writer.write("</td>");
+                        } else {
+                            for (CellData cellData : cells) {
+                                writer.write("<td>");
+                                if (cellData != null && cellData.text != null) {
+                                    if (cellData.link != null) {
+                                        writer.write("<a href=\"");
+                                        // TODO: The escape below looks wrong, but is probably harmless in most cases
+                                        writer.write(StringEscapeUtils.escapeHtml4(cellData.link));
+                                        writer.write("\">");
+                                    }
+                                    writer.write(StringEscapeUtils.escapeXml(cellData.text));
+                                    if (cellData.link != null) {
+                                        writer.write("</a>");
+                                    }
+                                }
+                                writer.write("</td>");
+                            }
                         }
+                        writer.write("</tr>\n");
+                    } catch (IOException e) {
+                        // Ignore
                     }
-                    writer.write("</tr>\n");
-                } catch (IOException e) {
-                    // Ignore
                 }
             }
         };
