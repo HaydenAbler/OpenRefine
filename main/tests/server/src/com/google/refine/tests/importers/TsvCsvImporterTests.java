@@ -38,6 +38,10 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.refine.importers.SeparatorBasedImporter;
+import com.google.refine.importers.SeparatorBasedImporter.Separator;
 
 public class TsvCsvImporterTests extends ImporterTest {
 
@@ -58,10 +63,10 @@ public class TsvCsvImporterTests extends ImporterTest {
         logger = LoggerFactory.getLogger(this.getClass());
     }
 
-    //constants
+    // constants
     private String SAMPLE_ROW = "NDB_No,Shrt_Desc,Water";
 
-    //System Under Test
+    // System Under Test
     private SeparatorBasedImporter SUT = null;
 
     @Override
@@ -73,22 +78,22 @@ public class TsvCsvImporterTests extends ImporterTest {
 
     @Override
     @AfterMethod
-    public void tearDown(){
+    public void tearDown() {
         SUT = null;
         super.tearDown();
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readJustColumns(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
+    public void readJustColumns(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
         String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3";
-        
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -97,20 +102,19 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readSimpleData_CSV_1Header_1Row(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "data1" + inputSeparator + "data2" + inputSeparator + "data3";
-        
-        
+    public void readSimpleData_CSV_1Header_1Row(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" + "data1" + inputSeparator + "data2"
+                + inputSeparator + "data3";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
-        
+
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
         Assert.assertEquals(project.columnModel.columns.get(1).getName(), "col2");
@@ -123,17 +127,17 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readSimpleData_CSV_1Header_1Row_GuessValues(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "data1" + inputSeparator + "234" + inputSeparator + "data3";
-        
+    public void readSimpleData_CSV_1Header_1Row_GuessValues(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" + "data1" + inputSeparator + "234"
+                + inputSeparator + "data3";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, true, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -148,16 +152,16 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readSimpleData_0Header_1Row(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
+    public void readSimpleData_0Header_1Row(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
         String input = "data1" + inputSeparator + "data2" + inputSeparator + "data3";
-        
+
         try {
             prepareOptions(sep, -1, 0, 0, 0, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "Column 1");
@@ -170,17 +174,17 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(2).value, "data3");
     }
 
-    @Test(groups = {  }, dataProvider = "CSV-TSV-AutoDetermine")
-    public void readDoesNotTrimLeadingTrailingWhitespace(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
+    @Test(groups = {}, dataProvider = "CSV-TSV-AutoDetermine")
+    public void readDoesNotTrimLeadingTrailingWhitespace(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
         String input = " data1 " + inputSeparator + " 3.4 " + inputSeparator + " data3 ";
-        
+
         try {
             prepareOptions(sep, -1, 0, 0, 0, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.rows.size(), 1);
@@ -191,16 +195,16 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readDoesNotTrimLeadingWhitespace(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
+    public void readDoesNotTrimLeadingWhitespace(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
         String input = " data1" + inputSeparator + " 12" + inputSeparator + " data3";
-        
+
         try {
             prepareOptions(sep, -1, 0, 0, 0, true, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.rows.size(), 1);
@@ -211,16 +215,16 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readCanAddNull(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
+    public void readCanAddNull(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
         String input = " data1" + inputSeparator + inputSeparator + " data3";
-        
+
         try {
             prepareOptions(sep, -1, 0, 0, 0, true, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.rows.size(), 1);
@@ -231,18 +235,17 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readSimpleData_2Header_1Row(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "sub1" + inputSeparator + "sub2" + inputSeparator + "sub3\n" +
-                       "data1" + inputSeparator + "data2" + inputSeparator + "data3";
-        
+    public void readSimpleData_2Header_1Row(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" + "sub1" + inputSeparator + "sub2"
+                + inputSeparator + "sub3\n" + "data1" + inputSeparator + "data2" + inputSeparator + "data3";
+
         try {
             prepareOptions(sep, -1, 0, 0, 2, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1 sub1");
@@ -256,17 +259,18 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readSimpleData_RowLongerThanHeader(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-        "data1" + inputSeparator + "data2" + inputSeparator + "data3" + inputSeparator + "data4" + inputSeparator + "data5" + inputSeparator + "data6";
-        
+    public void readSimpleData_RowLongerThanHeader(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" + "data1" + inputSeparator + "data2"
+                + inputSeparator + "data3" + inputSeparator + "data4" + inputSeparator + "data5" + inputSeparator
+                + "data6";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 6);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -285,18 +289,18 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(5).value, "data6");
     }
 
-    @Test(groups = { }, dataProvider = "CSV-TSV-AutoDetermine")
-    public void readQuotedData(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "\"\"\"To Be\"\" is often followed by \"\"or not To Be\"\"\"" + inputSeparator + "data2";
-        
+    @Test(groups = {}, dataProvider = "CSV-TSV-AutoDetermine")
+    public void readQuotedData(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n"
+                + "\"\"\"To Be\"\" is often followed by \"\"or not To Be\"\"\"" + inputSeparator + "data2";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -309,18 +313,17 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readIgnoreFirstLine(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "ignore1\n" +
-                       "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "data1" + inputSeparator + "data2" + inputSeparator + "data3";
-        
+    public void readIgnoreFirstLine(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "ignore1\n" + "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" + "data1"
+                + inputSeparator + "data2" + inputSeparator + "data3";
+
         try {
             prepareOptions(sep, -1, 0, 1, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -334,18 +337,17 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readSkipFirstDataLine(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "skip1\n" +
-                       "data1" + inputSeparator + "data2" + inputSeparator + "data3";
-        
+    public void readSkipFirstDataLine(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" + "skip1\n" + "data1"
+                + inputSeparator + "data2" + inputSeparator + "data3";
+
         try {
             prepareOptions(sep, -1, 1, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -359,22 +361,18 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void readIgnore3_Header2_Skip1(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "ignore1\n" +
-                       "ignore2\n" +
-                       "ignore3\n" +
-                       "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "sub1" + inputSeparator + "sub2" + inputSeparator + "sub3\n" +
-                       "skip1\n" +
-                       "data1" + inputSeparator + "data2" + inputSeparator + "data3";
-        
+    public void readIgnore3_Header2_Skip1(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "ignore1\n" + "ignore2\n" + "ignore3\n" + "col1" + inputSeparator + "col2" + inputSeparator
+                + "col3\n" + "sub1" + inputSeparator + "sub2" + inputSeparator + "sub3\n" + "skip1\n" + "data1"
+                + inputSeparator + "data2" + inputSeparator + "data3";
+
         try {
             prepareOptions(sep, -1, 1, 3, 2, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1 sub1");
@@ -387,26 +385,23 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(2).value, "data3");
     }
 
-    @Test(groups = {  }, dataProvider = "CSV-TSV-AutoDetermine")
-    public void readIgnore3_Header2_Skip2_limit2(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "ignore1\n" +
-                       "ignore2\n" +
-                       "ignore3\n" +
-                       "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-                       "sub1" + inputSeparator + "sub2" + inputSeparator + "sub3\n" +
-                       "skip1\n" +
-                       "skip2\n" +
-                       "data-row1-cell1" + inputSeparator + "data-row1-cell2" + inputSeparator + "data-row1-cell3\n" +
-                       "data-row2-cell1" + inputSeparator + "data-row2-cell2" + inputSeparator + "\n" + //missing last data point of this row on purpose
-                       "data-row3-cell1" + inputSeparator + "data-row3-cell2" + inputSeparator + "data-row1-cell3";
-        
+    @Test(groups = {}, dataProvider = "CSV-TSV-AutoDetermine")
+    public void readIgnore3_Header2_Skip2_limit2(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "ignore1\n" + "ignore2\n" + "ignore3\n" + "col1" + inputSeparator + "col2" + inputSeparator
+                + "col3\n" + "sub1" + inputSeparator + "sub2" + inputSeparator + "sub3\n" + "skip1\n" + "skip2\n"
+                + "data-row1-cell1" + inputSeparator + "data-row1-cell2" + inputSeparator + "data-row1-cell3\n"
+                + "data-row2-cell1" + inputSeparator + "data-row2-cell2" + inputSeparator + "\n" + // missing last data
+                                                                                                   // point of this row
+                                                                                                   // on purpose
+                "data-row3-cell1" + inputSeparator + "data-row3-cell2" + inputSeparator + "data-row1-cell3";
+
         try {
             prepareOptions(sep, 2, 2, 3, 2, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1 sub1");
@@ -424,15 +419,15 @@ public class TsvCsvImporterTests extends ImporterTest {
     }
 
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void ignoreQuotes(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
+    public void ignoreQuotes(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
         String input = "data1" + inputSeparator + "data2\"" + inputSeparator + "data3" + inputSeparator + "data4";
         try {
             prepareOptions(sep, -1, 0, 0, 0, false, true);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 4);
         Assert.assertEquals(project.rows.size(), 1);
@@ -442,18 +437,18 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(2).value, "data3");
     }
 
-    @Test(groups = { }, dataProvider = "CSV-TSV-AutoDetermine")
-    public void readWithMultiLinedQuotedData(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-            "\"\"\"To\n Be\"\" is often followed by \"\"or not To\n Be\"\"\"" + inputSeparator + "data2";
-        
+    @Test(groups = {}, dataProvider = "CSV-TSV-AutoDetermine")
+    public void readWithMultiLinedQuotedData(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n"
+                + "\"\"\"To\n Be\"\" is often followed by \"\"or not To\n Be\"\"\"" + inputSeparator + "data2";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -461,22 +456,23 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.columnModel.columns.get(2).getName(), "col3");
         Assert.assertEquals(project.rows.size(), 1);
         Assert.assertEquals(project.rows.get(0).cells.size(), 2);
-        Assert.assertEquals(project.rows.get(0).cells.get(0).value, "\"To\n Be\" is often followed by \"or not To\n Be\"");
+        Assert.assertEquals(project.rows.get(0).cells.get(0).value,
+                "\"To\n Be\" is often followed by \"or not To\n Be\"");
         Assert.assertEquals(project.rows.get(0).cells.get(1).value, "data2");
     }
 
-    @Test(groups = {  }, dataProvider = "CSV-TSV-AutoDetermine")
-    public void readWithMultiLinedQuotedDataAndBlankLines(String sep){
-        //create input
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n" +
-            "\"A line with many \n\n\n\n\n empty lines\"" + inputSeparator + "data2";
-        
+    @Test(groups = {}, dataProvider = "CSV-TSV-AutoDetermine")
+    public void readWithMultiLinedQuotedDataAndBlankLines(String sep) {
+        // create input
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "col1" + inputSeparator + "col2" + inputSeparator + "col3\n"
+                + "\"A line with many \n\n\n\n\n empty lines\"" + inputSeparator + "data2";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false);
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
@@ -488,22 +484,20 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(1).value, "data2");
     }
 
-
     @Test(dataProvider = "CSV-TSV-AutoDetermine")
-    public void customQuoteCharacter(String sep){
-        //create input to test with
-        String inputSeparator =  sep == null ? "\t" : sep;
-        String input = "'col1'" + inputSeparator + "'col2'" + inputSeparator + "'col3'\n" +
-                       "'data1'" + inputSeparator + "'data2'" + inputSeparator + "'data3'";
-        
-        
+    public void customQuoteCharacter(String sep) {
+        // create input to test with
+        String inputSeparator = sep == null ? "\t" : sep;
+        String input = "'col1'" + inputSeparator + "'col2'" + inputSeparator + "'col3'\n" + "'data1'" + inputSeparator
+                + "'data2'" + inputSeparator + "'data3'";
+
         try {
             prepareOptions(sep, -1, 0, 0, 1, false, false, "'");
             parseOneFile(SUT, new StringReader(input));
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
-        
+
         Assert.assertEquals(project.columnModel.columns.size(), 3);
         Assert.assertEquals(project.columnModel.columns.get(0).getName(), "col1");
         Assert.assertEquals(project.columnModel.columns.get(1).getName(), "col2");
@@ -514,88 +508,121 @@ public class TsvCsvImporterTests extends ImporterTest {
         Assert.assertEquals(project.rows.get(0).cells.get(1).value, "data2");
         Assert.assertEquals(project.rows.get(0).cells.get(2).value, "data3");
     }
-    
-    
-    //---------------------util tests------------------------
-    
+
+    // ---------------------util tests------------------------
+
     @Test
-    public void guessIgnoreQuotes()     {
+    public void guessIgnoreQuotes() {
         File file = new File(this.getClass().getClassLoader().getResource("ignoresQuotes.csv").getFile());
-        Assert.assertEquals(SeparatorBasedImporter.guessQuotes(file,"UTF-8"), SeparatorBasedImporter.IGNORE_QUOTES);
+        Assert.assertEquals(SeparatorBasedImporter.guessQuotes(file, "UTF-8"), SeparatorBasedImporter.IGNORE_QUOTES);
     }
-    
+
     @Test
-    public void guessSeperator()     {
+    public void guessSeperator() {
         File file = new File(this.getClass().getClassLoader().getResource("ignoresQuotes.csv").getFile());
-        Assert.assertEquals(SeparatorBasedImporter.guessSeparator(file,"UTF-8",false).separator, ',');
+        Assert.assertEquals(SeparatorBasedImporter.guessSeparator(file, "UTF-8", false).separator, ',');
     }
-    
-    //---------------------read tests------------------------
+
+    @Test
+    public void whenGettingSeperatorsOnLine_Givencommas_thenReturnsSeparatorContaingcomma() {
+        String testString = "a,,";
+        List<Separator> separators = new ArrayList<SeparatorBasedImporter.Separator>();
+        Map<Character, Separator> separatorMap = new HashMap<Character, SeparatorBasedImporter.Separator>();
+
+        Assert.assertEquals(
+                SeparatorBasedImporter.getSeperatorsOnLine(true, separators, separatorMap, false, testString), false);
+        Assert.assertEquals(separators.get(0).separator, ',');
+        Assert.assertEquals(separators.get(0).currentLineCount, 2);
+    }
+
+    @Test
+    public void whenGettingMultipleSeperatorsOnLine_GivenCommasandTab_thenReturnsSeparatorListContaingCommaandTab() {
+        String testString = "a,,\t";
+        List<Separator> separators = new ArrayList<SeparatorBasedImporter.Separator>();
+        Map<Character, Separator> separatorMap = new HashMap<Character, SeparatorBasedImporter.Separator>();
+
+        Assert.assertEquals(
+                SeparatorBasedImporter.getSeperatorsOnLine(true, separators, separatorMap, false, testString), false);
+        Assert.assertEquals(separators.get(0).separator, ',');
+        Assert.assertEquals(separators.get(0).currentLineCount, 2);
+        Assert.assertEquals(separators.get(1).separator, '\t');
+        Assert.assertEquals(separators.get(1).currentLineCount, 1);
+    }
+
+    @Test
+    public void whenIncrementignSeperatorsPerLine_Givencommas_thenReturnsSeparatorContaingcommaAndCorrectValues() {
+        String testString = "a,,";
+        List<Separator> separators = new ArrayList<SeparatorBasedImporter.Separator>();
+        Map<Character, Separator> separatorMap = new HashMap<Character, SeparatorBasedImporter.Separator>();
+        SeparatorBasedImporter.getSeperatorsOnLine(true, separators, separatorMap, false, testString);
+        SeparatorBasedImporter.incrementSeperators(separators);
+        Assert.assertEquals(separators.get(0).currentLineCount, 0);
+        Assert.assertEquals(separators.get(0).totalOfSquaredCount, 4);
+        Assert.assertEquals(separators.get(0).totalCount, 2);
+    }
+
+    // ---------------------read tests------------------------
     @Test
     public void readCsvWithProperties() {
         StringReader reader = new StringReader(SAMPLE_ROW);
-        
+
         prepareOptions(",", -1, 0, 0, 0, true, true);
-        
+
         try {
             parseOneFile(SUT, reader);
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
-        
+
         Assert.assertEquals(project.rows.size(), 1);
         Assert.assertEquals(project.rows.get(0).cells.size(), 3);
-        Assert.assertEquals((String)project.rows.get(0).cells.get(0).value, "NDB_No");
-        Assert.assertEquals((String)project.rows.get(0).cells.get(1).value, "Shrt_Desc");
-        Assert.assertEquals((String)project.rows.get(0).cells.get(2).value, "Water");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(0).value, "NDB_No");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(1).value, "Shrt_Desc");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(2).value, "Water");
 
         verifyOptions();
     }
 
     @Test
-    public void readCsvWithPropertiesIgnoreQuotes(){
+    public void readCsvWithPropertiesIgnoreQuotes() {
         String input = "data1,data2\",data3,data4";
         StringReader reader = new StringReader(input);
 
         prepareOptions(",", -1, 0, 0, 0, true, true);
-        
+
         try {
             parseOneFile(SUT, reader);
         } catch (Exception e) {
-            Assert.fail("Exception during file parse",e);
+            Assert.fail("Exception during file parse", e);
         }
-        
+
         Assert.assertEquals(project.rows.size(), 1);
         Assert.assertEquals(project.rows.get(0).cells.size(), 4);
-        Assert.assertEquals((String)project.rows.get(0).cells.get(0).value, "data1");
-        Assert.assertEquals((String)project.rows.get(0).cells.get(1).value, "data2");
-        Assert.assertEquals((String)project.rows.get(0).cells.get(2).value, "data3");
-        Assert.assertEquals((String)project.rows.get(0).cells.get(3).value, "data4");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(0).value, "data1");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(1).value, "data2");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(2).value, "data3");
+        Assert.assertEquals((String) project.rows.get(0).cells.get(3).value, "data4");
 
         verifyOptions();
     }
 
-    //--helpers--
+    // --helpers--
     /**
      * Used for parameterized testing for both SeparatorParser and TsvCsvParser.
      */
     @DataProvider(name = "CSV-TSV-AutoDetermine")
-    public Object[][] CSV_TSV_or_AutoDetermine(){
-        return new Object[][]{
-                {","},{"\t"},{null}
-        };
+    public Object[][] CSV_TSV_or_AutoDetermine() {
+        return new Object[][] { { "," }, { "\t" }, { null } };
     }
-    
-    protected void prepareOptions(
-            String sep, int limit, int skip, int ignoreLines,
-            int headerLines, boolean guessValueType, boolean ignoreQuotes) {
+
+    protected void prepareOptions(String sep, int limit, int skip, int ignoreLines, int headerLines,
+            boolean guessValueType, boolean ignoreQuotes) {
         prepareOptions(sep, limit, skip, ignoreLines, headerLines, guessValueType, ignoreQuotes, "\"");
     }
 
-    protected void prepareOptions(
-        String sep, int limit, int skip, int ignoreLines,
-        int headerLines, boolean guessValueType, boolean ignoreQuotes, String quoteCharacter) {
-        
+    protected void prepareOptions(String sep, int limit, int skip, int ignoreLines, int headerLines,
+            boolean guessValueType, boolean ignoreQuotes, String quoteCharacter) {
+
         whenGetStringOption("separator", options, sep);
         whenGetStringOption("quoteCharacter", options, quoteCharacter);
         whenGetIntegerOption("limit", options, limit);
@@ -618,7 +645,7 @@ public class TsvCsvImporterTests extends ImporterTest {
             verify(options, times(1)).getBoolean("processQuotes");
             verify(options, times(1)).getBoolean("storeBlankCellsAsNulls");
         } catch (JSONException e) {
-            Assert.fail("JSON exception",e);
+            Assert.fail("JSON exception", e);
         }
 
     }

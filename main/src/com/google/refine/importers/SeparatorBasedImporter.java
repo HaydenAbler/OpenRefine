@@ -67,16 +67,16 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
     public SeparatorBasedImporter() {
         super(false);
     }
-    
+
     public static final boolean IGNORE_QUOTES = false;
-    
+
     @Override
     public JSONObject createParserUIInitializationData(ImportingJob job, List<JSONObject> fileRecords, String format) {
         JSONObject options = super.createParserUIInitializationData(job, fileRecords, format);
 
         boolean quotes = guessQuotes(job, fileRecords);
         String separator = guessSeparator(job, fileRecords, quotes);
-        
+
         JSONUtilities.safePut(options, "separator", separator != null ? separator : "\\t");
         JSONUtilities.safePut(options, "guessCellValueTypes", false);
         JSONUtilities.safePut(options, "processQuotes", quotes);
@@ -156,56 +156,47 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
 
     static public boolean guessQuotes(File file, String encoding) {
         boolean quotes = !IGNORE_QUOTES;
-        try {
-            InputStream is = new FileInputStream(file);
-            Reader reader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
-            LineNumberReader lineNumberReader = new LineNumberReader(reader);
+        try (InputStream is = new FileInputStream(file);
+                Reader reader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
+                LineNumberReader lineNumberReader = new LineNumberReader(reader);) {
 
-            try {
-                int totalChars = 0;
-                int lineCount = 0;
-                int totalQuotes = 0;
-                boolean inEscape = false;
+            int totalChars = 0;
+            int lineCount = 0;
+            int totalQuotes = 0;
+            boolean inEscape = false;
 
-                String s;
-                while (totalChars < 64 * 1024 && lineCount < 100 && (s = lineNumberReader.readLine()) != null) {
+            String s;
+            while (totalChars < 64 * 1024 && lineCount < 100 && (s = lineNumberReader.readLine()) != null) {
 
-                    totalChars += s.length() + 1; // count the new line character
-                    if (s.length() == 0) {
-                        continue;
-                    }
-                    if (!inEscape) {
-                        lineCount++;
-                    }
-
-                    for (int i = 0; i < s.length(); i++) {
-                        char c = s.charAt(i);
-                        if (c == '"' && !inEscape) {
-                            totalQuotes++;
-                        }
-                        if ('\\' == c) {
-                            inEscape = !inEscape;
-                        } else {
-                            inEscape = false;
-                        }
-
-                    }
-                    if (totalQuotes % 2 == 0) {
-                        totalQuotes = 0;
-                    } else {
-                        quotes = IGNORE_QUOTES;
-                        break;
-                    }
+                totalChars += s.length() + 1; // count the new line character
+                if (s.length() == 0) {
+                    continue;
+                }
+                if (!inEscape) {
+                    lineCount++;
                 }
 
-            } finally {
-                lineNumberReader.close();
-                reader.close();
-                is.close();
-            }
-        } catch (
+                for (int i = 0; i < s.length(); i++) {
+                    char c = s.charAt(i);
+                    if (c == '"' && !inEscape) {
+                        totalQuotes++;
+                    }
+                    if ('\\' == c) {
+                        inEscape = !inEscape;
+                    } else {
+                        inEscape = false;
+                    }
 
-        UnsupportedEncodingException e) {
+                }
+                if (totalQuotes % 2 == 0) {
+                    totalQuotes = 0;
+                } else {
+                    quotes = IGNORE_QUOTES;
+                    break;
+                }
+            }
+
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -234,12 +225,12 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
     static public class Separator {
 
         public char separator;
-        int totalCount = 0;
-        int totalOfSquaredCount = 0;
-        int currentLineCount = 0;
+        public int totalCount = 0;
+        public int totalOfSquaredCount = 0;
+        public int currentLineCount = 0;
 
-        double averagePerLine;
-        double stddev;
+        public double averagePerLine;
+        public double stddev;
     }
 
     static public Separator guessSeparator(File file, String encoding) {
@@ -248,82 +239,43 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
 
     // TODO: Move this to the CSV project?
     static public Separator guessSeparator(File file, String encoding, boolean handleQuotes) {
-        try {
-            InputStream is = new FileInputStream(file);
-            Reader reader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
-            LineNumberReader lineNumberReader = new LineNumberReader(reader);
+        try (InputStream is = new FileInputStream(file);
+                Reader reader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
+                LineNumberReader lineNumberReader = new LineNumberReader(reader);) {
 
-            try {
-                List<Separator> separators = new ArrayList<SeparatorBasedImporter.Separator>();
-                Map<Character, Separator> separatorMap = new HashMap<Character, SeparatorBasedImporter.Separator>();
+            List<Separator> separators = new ArrayList<SeparatorBasedImporter.Separator>();
+            Map<Character, Separator> separatorMap = new HashMap<Character, SeparatorBasedImporter.Separator>();
 
-                int totalChars = 0;
-                int lineCount = 0;
-                boolean inQuote = false;
-                String s;
-                while (totalChars < 64 * 1024 && lineCount < 100 && (s = lineNumberReader.readLine()) != null) {
+            int totalChars = 0;
+            int lineCount = 0;
+            boolean inQuote = false;
+            String line;
+            while (totalChars < 64 * 1024 && lineCount < 100 && (line = lineNumberReader.readLine()) != null) {
 
-                    totalChars += s.length() + 1; // count the new line character
-                    if (s.length() == 0) {
-                        continue;
-                    }
-                    if (!inQuote) {
-                        lineCount++;
-                    }
-
-                    for (int i = 0; i < s.length(); i++) {
-                        char c = s.charAt(i);
-                        if ('"' == c && handleQuotes) {
-                            inQuote = !inQuote;
-                        }
-                        if (!Character.isLetterOrDigit(c) && !"\"' .-".contains(s.subSequence(i, i + 1))
-                                && (!handleQuotes || !inQuote)) {
-                            Separator separator = separatorMap.get(c);
-                            if (separator == null) {
-                                separator = new Separator();
-                                separator.separator = c;
-
-                                separatorMap.put(c, separator);
-                                separators.add(separator);
-                            }
-                            separator.currentLineCount++;
-                        }
-                    }
-
-                    if (!inQuote) {
-                        for (Separator separator : separators) {
-                            separator.totalCount += separator.currentLineCount;
-                            separator.totalOfSquaredCount += separator.currentLineCount * separator.currentLineCount;
-                            separator.currentLineCount = 0;
-                        }
-                    }
+                totalChars += line.length() + 1; // count the new line character
+                if (line.length() == 0) {
+                    continue;
+                }
+                if (!inQuote) {
+                    lineCount++;
                 }
 
-                if (separators.size() > 0) {
-                    for (Separator separator : separators) {
-                        separator.averagePerLine = separator.totalCount / (double) lineCount;
-                        separator.stddev = Math.sqrt((((double) lineCount * separator.totalOfSquaredCount)
-                                - (separator.totalCount * separator.totalCount))
-                                / ((double) lineCount * (lineCount - 1)));
-                    }
+                inQuote = getSeperatorsOnLine(handleQuotes, separators, separatorMap, inQuote, line);
 
-                    Collections.sort(separators, new Comparator<Separator>() {
-
-                        @Override
-                        public int compare(Separator sep0, Separator sep1) {
-                            return Double.compare(sep0.stddev / sep0.averagePerLine, sep1.stddev / sep1.averagePerLine);
-                        }
-                    });
-                    Separator separator = separators.get(0);
-                    if (separator.stddev / separator.averagePerLine < 0.1) {
-                        return separator;
-                    }
-
+                if (!inQuote) {
+                    incrementSeperators(separators);
                 }
-            } finally {
-                lineNumberReader.close();
-                reader.close();
-                is.close();
+            }
+
+            if (separators.size() > 0) {
+                calcStandardDeviationForSeperators(separators, lineCount);
+
+                separators.sort((a, b) -> Double.compare(a.stddev / a.averagePerLine, b.stddev / b.averagePerLine));
+
+                Separator mostLikelySeparator = separators.get(0);
+                if (mostLikelySeparator.stddev / mostLikelySeparator.averagePerLine < 0.1) {
+                    return mostLikelySeparator;
+                }
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -331,5 +283,48 @@ public class SeparatorBasedImporter extends TabularImportingParserBase {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static boolean getSeperatorsOnLine(boolean handleQuotes, List<Separator> separators,
+            Map<Character, Separator> separatorMap, boolean inQuote, String string) {
+        for (int i = 0; i < string.length(); i++) {
+            char c = string.charAt(i);
+            if ('"' == c && handleQuotes) {
+                inQuote = !inQuote;
+            }
+            if (isPotentialSeparator(handleQuotes, inQuote, string, i, c)) {
+                Separator separator = separatorMap.get(c);
+                if (separator == null) {
+                    separator = new Separator();
+                    separator.separator = c;
+
+                    separatorMap.put(c, separator);
+                    separators.add(separator);
+                }
+                separator.currentLineCount++;
+            }
+        }
+        return inQuote;
+    }
+
+    private static boolean isPotentialSeparator(boolean handleQuotes, boolean inQuote, String string, int i, char c) {
+        return !Character.isLetterOrDigit(c) && !"\"' .-".contains(string.subSequence(i, i + 1))
+                && (!handleQuotes || !inQuote);
+    }
+
+    private static void calcStandardDeviationForSeperators(List<Separator> separators, int lineCount) {
+        for (Separator separator : separators) {
+            separator.averagePerLine = separator.totalCount / (double) lineCount;
+            separator.stddev = Math.sqrt((((double) lineCount * separator.totalOfSquaredCount)
+                    - (separator.totalCount * separator.totalCount)) / ((double) lineCount * (lineCount - 1)));
+        }
+    }
+
+    public static void incrementSeperators(List<Separator> separators) {
+        for (Separator separator : separators) {
+            separator.totalCount += separator.currentLineCount;
+            separator.totalOfSquaredCount += separator.currentLineCount * separator.currentLineCount;
+            separator.currentLineCount = 0;
+        }
     }
 }
