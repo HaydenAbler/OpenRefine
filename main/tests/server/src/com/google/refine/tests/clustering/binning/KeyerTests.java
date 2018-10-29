@@ -62,9 +62,9 @@ public class KeyerTests extends RefineTest {
     
     private static final String[][] testNGramStrings = {
         {"abcdefg","abbccddeeffg"},
-        {"",""}, //TODO: add more test cases
-        {"",""},
-        {"",""},
+        {"Paris","arispari"}, //TODO: add more test cases
+        {"This is a Sentence","thisisisaasentence"},
+        {"The cow jumps over the moon","thecowcowjumpsjumpsoveroverthemoon"},
     };
     
     @Override

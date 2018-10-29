@@ -141,12 +141,16 @@ public class ExcelImporter extends TabularImportingParserBase {
         JSONObject options,
         List<Exception> exceptions
     ) {
+        System.out.println("Sample xls file: " + fileSource);
+        
         Workbook wb = null;
         if (!inputStream.markSupported()) {
           inputStream = new PushbackInputStream(inputStream, 8);
         }
         
         try {
+            if(fileSource.endsWith(".xlsm"))
+                throw new POIXMLException();
             wb = POIXMLDocument.hasOOXMLHeader(inputStream) ?
                 new XSSFWorkbook(inputStream) :
                 new HSSFWorkbook(new POIFSFileSystem(inputStream));
@@ -174,11 +178,18 @@ public class ExcelImporter extends TabularImportingParserBase {
                 ));
                 return;
         } catch (POIXMLException e) {
-            exceptions.add(new ImportException(
-                    "Attempted to parse as an Excel file but failed. " +
-                    "Invalid XML.",
-                    e
-                ));
+            if(fileSource.endsWith(".xlsm"))
+                exceptions.add(new ImportException(
+                        "Attempted to parse as an Excel file but failed. " +
+                        "Macros are currently not supported.",
+                        e
+                    ));
+            else
+                exceptions.add(new ImportException(
+                        "Attempted to parse as an Excel file but failed. " +
+                        "Invalid XML.",
+                        e
+                    ));
                 return;
         }
         

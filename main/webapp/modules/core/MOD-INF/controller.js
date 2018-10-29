@@ -241,6 +241,7 @@ function registerImporting() {
 
   IM.registerExtension(".xls", "binary/text/xml/xls/xlsx");
   IM.registerExtension(".xlsx", "binary/text/xml/xls/xlsx");
+  IM.registerExtension(".xlsm", "binary/text/xml/xls/xlsx");
 
   IM.registerExtension(".ods", "text/xml/ods");
   
