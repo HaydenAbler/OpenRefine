@@ -35,14 +35,13 @@ public class ForEachIndexTests {
     @Test 
     public void checkArguementsWithInvalidSecondArguement()       {
         Evaluable[] args = new Evaluable[4];
-        args[1] = new VariableExpr("asf");
         assertNotEquals(sut.checkArguments(args), null);
     }
     
     @Test 
     public void checkArguementsWithInvalidThirdArguement()       {
         Evaluable[] args = new Evaluable[4];
-        args[2] = new VariableExpr("asf");
+        args[1] = new VariableExpr("asf");
         assertNotEquals(sut.checkArguments(args), null);
     }
     
