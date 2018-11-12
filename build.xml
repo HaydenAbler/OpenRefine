@@ -59,6 +59,9 @@
     
     <property name="reports.dir" value="${build.dir}/reports" />
 
+	<property name="pmd.dir" value="${tools.dir}/pmd-bin-4.2.6" />
+	<property name="findbugs.dir" value="${tools.dir}/findbugs-3.0.1/" />
+	
     <property name="built.webapp.name" value="webapp" />
     <property name="built.webapp.dir" value="${build.dir}/${built.webapp.name}" />
 
@@ -428,16 +431,17 @@
         <mkdir dir="${reports.dir}" />
     </target>
 
-    <target name="findbugs" depends="build,prepare_reports">
+    <target name="findbugs" depends="build,prepare_reports,jar">
         <taskdef 
             name="findbugs" 
             classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
             classpath="${findbugs.dir}/lib/findbugs-ant.jar" 
         />
-        <findbugs jvmargs="-Xmx1024m" home="${findbugs.dir}" output="html" outputFile="${reports.dir}/findbugs.html" >
-          <auxClasspath refid="webapp.class.path" />
-          <sourcePath path="${webapp.src.dir}" />
-          <class location="${webapp.classes.dir}" />
+        <findbugs jvmargs="-Xmx1024m" home="${findbugs.dir}/" output="html" outputFile="${reports.dir}/findbugs.html" >
+          <auxClasspath refid="server.class.path" />
+          <sourcePath path="${server.src.dir}/**" />
+          <class location="${build.dir}/${fullname}.jar" />
+          <class location="${build.dir}/${fullname}-server.jar" />        	
         </findbugs>        
     </target>
     
@@ -450,7 +454,8 @@
             classname="net.sourceforge.pmd.ant.PMDTask"
             classpathref="pmd.path" 
         />
-        <pmd rulesetfiles="${conf.dir}/pmd.rules.xml" targetjdk="1.8" encoding="UTF-8">
+        <pmd rulesetfiles="${conf.dir}/pmd.rules.xml" targetJDK="1.7" encoding="UTF-8">
+        	
             <formatter type="html" toFile="${reports.dir}/pmd.html" toConsole="true"/>
             <fileset dir="${server.src.dir}">
                 <include name="**/*.java"/>
