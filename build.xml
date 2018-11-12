@@ -59,7 +59,7 @@
     
     <property name="reports.dir" value="${build.dir}/reports" />
 
-	<property name="pmd.dir" value="${tools.dir}/pmd-bin-4.2.6" />
+	<property name="pmd.dir" value="${tools.dir}/pmd-bin-6.9.0" />
 	<property name="findbugs.dir" value="${tools.dir}/findbugs-3.0.1/" />
 	
     <property name="built.webapp.name" value="webapp" />
@@ -454,8 +454,15 @@
             classname="net.sourceforge.pmd.ant.PMDTask"
             classpathref="pmd.path" 
         />
-        <pmd rulesetfiles="${conf.dir}/pmd.rules.xml" targetJDK="1.7" encoding="UTF-8">
-        	
+        <pmd encoding="UTF-8">
+        	<sourceLanguage name="java" version="1.8"/>
+        	<ruleset>java-basic</ruleset>
+        	<ruleset>java-strings</ruleset>
+        	<ruleset>java-braces</ruleset>
+        	<ruleset>java-unusedcode</ruleset>
+        	<ruleset>java-codesize</ruleset>
+        	<ruleset>java-coupling</ruleset>
+        	        	
             <formatter type="html" toFile="${reports.dir}/pmd.html" toConsole="true"/>
             <fileset dir="${server.src.dir}">
                 <include name="**/*.java"/>

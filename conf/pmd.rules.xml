@@ -1,32 +1,43 @@
 <?xml version="1.0"?>
-<ruleset name="OpenRefine PMD Ruleset"
-    xmlns="http://pmd.sf.net/ruleset/1.0.0"
+
+<ruleset name="Basic"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
-    xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
-  <description>OpenRefine PMD Ruleset</description>
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>
+The Basic ruleset contains a collection of good practices which should be followed.
+  </description>
 
-  <rule ref="rulesets/basic.xml">
-    <exclude name="EmptyCatchBlock"/>
-    <exclude name="AvoidUsingHardCodedIP"/>
-  </rule>
+    <!-- Rules, that have been moved into a category -->
+    <rule ref="category/java/errorprone.xml/AvoidBranchingStatementAsLastInLoop" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/AvoidDecimalLiteralsInBigDecimalConstructor" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/BrokenNullCheck" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/CheckSkipResult" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/ClassCastExceptionWithToArray" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/DontUseFloatTypeForLoopIndices" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/JumbledIncrementer" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/MisplacedNullCheck" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/OverrideBothEqualsAndHashcode" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/ReturnFromFinallyBlock" deprecated="true" />
+    <rule ref="category/java/errorprone.xml/UnconditionalIfStatement" deprecated="true" />
 
-  <rule ref="rulesets/braces.xml">
-    <exclude name="IfStmtsMustUseBraces"/>
-  </rule>  
-  
-  <rule ref="rulesets/unusedcode.xml"/>
-  <rule ref="rulesets/imports.xml"/>
-  <rule ref="rulesets/strings.xml">
-    <exclude name="ConsecutiveLiteralAppends"/>
-    <exclude name="AvoidDuplicateLiterals"/>
-  </rule>
+    <rule ref="category/java/multithreading.xml/AvoidThreadGroup" deprecated="true" />
+    <rule ref="category/java/multithreading.xml/DontCallThreadRun" deprecated="true" />
+    <rule ref="category/java/multithreading.xml/DoubleCheckedLocking" deprecated="true" />
 
-  <rule ref="rulesets/unusedcode.xml"/>
-  <rule ref="rulesets/clone.xml"/>
-  
-  <rule ref="rulesets/migrating.xml">
-    <exclude name="JUnit4TestShouldUseTestAnnotation"/>
-  </rule>  
-  
+    <rule ref="category/java/bestpractices.xml/AvoidUsingHardCodedIP" deprecated="true" />
+    <rule ref="category/java/bestpractices.xml/CheckResultSet" deprecated="true" />
+
+    <rule ref="category/java/codestyle.xml/ExtendsObject" deprecated="true" />
+    <rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" deprecated="true" />
+
+    <rule ref="category/java/performance.xml/BigIntegerInstantiation" deprecated="true" />
+    <rule ref="category/java/performance.xml/BooleanInstantiation" deprecated="true" />
+
+    <rule ref="category/java/design.xml/CollapsibleIfStatements" deprecated="true" />
+    <rule ref="category/java/design.xml/SimplifiedTernary" deprecated="true" />
+
 </ruleset>
+
