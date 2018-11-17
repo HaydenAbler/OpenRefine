@@ -18,7 +18,14 @@
    systemProperty 'some.prop', 'value'
 
    // explicitly include or exclude tests
-   include 'main/test/server/src/**'
+   include 'main/test/server/src/com/google/refine/expr/EvalErrorTests.java'
+   sourceSets {
+  main {
+    test {
+      include 'main/test/server/src/com/google/refine/expr/EvalErrorTests.java'
+    }
+  }
+}
 
    // show standard out and standard error of the test JVM(s) on the console
    testLogging.showStandardStreams = true
