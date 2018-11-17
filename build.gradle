@@ -11,7 +11,7 @@
  sourceSets {
     test {
         java {
-            srcDirs = ["main/test/server/src/com/google/refine/expr/EvalErrorTests.java"]  // Note @Peter's comment below
+            srcDirs = ["main/test/server/src/com/google/refine/expr"]  // Note @Peter's comment below
         }
     }
 }
