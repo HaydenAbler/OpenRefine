@@ -8,6 +8,13 @@
 
 //ant.importBuild 'build.xml'
  
+ sourceSets {
+    test {
+        java {
+            srcDirs = ["main/test/server/src/com/google/refine/expr/EvalErrorTests.java"]  // Note @Peter's comment below
+        }
+    }
+}
  test {
    // enable TestNG support (default is JUnit)
    useTestNG()
@@ -20,11 +27,11 @@
    // explicitly include or exclude tests
    include 'main/test/server/src/com/google/refine/expr/EvalErrorTests.java'
    sourceSets {
-  main {
     test {
-      include 'main/test/server/src/com/google/refine/expr/EvalErrorTests.java'
+        java {
+            srcDirs = ["main/test/server/src/com/google/refine/expr/EvalErrorTests.java"]  // Note @Peter's comment below
+        }
     }
-  }
 }
 
    // show standard out and standard error of the test JVM(s) on the console
