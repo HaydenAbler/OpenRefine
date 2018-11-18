@@ -11,7 +11,7 @@
  sourceSets {
     test {
         java {
-            srcDirs = ["main/test/server/src/com/google/refine/expr"]  // Note @Peter's comment below
+            srcDir  "main/test/server/src"  // Note @Peter's comment below
         }
     }
 }
@@ -25,14 +25,7 @@
    systemProperty 'some.prop', 'value'
 
    // explicitly include or exclude tests
-   include 'main/test/server/src/com/google/refine/expr/EvalErrorTests.java'
-   sourceSets {
-    test {
-        java {
-            srcDirs = ["main/test/server/src/com/google/refine/expr"]  // Note @Peter's comment below
-        }
-    }
-}
+   include 'main/test/server/src'
 
    // show standard out and standard error of the test JVM(s) on the console
    testLogging.showStandardStreams = true
