@@ -4,9 +4,13 @@
  * This is a general purpose Gradle build.
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds/
  */
-  apply plugin: 'java'
+  
 
-//ant.importBuild 'build.xml'
+  //ant.importBuild 'build.xml'
+  
+  apply plugin: 'java'
+  
+  
  
  sourceSets {
     test {
@@ -15,16 +19,18 @@
         }
     }
 }
+
  test {
-   // enable TestNG support (default is JUnit)
-   useTestNG()
-   // enable JUnit Platform (a.k.a. JUnit 5) support
-   useJUnitPlatform()
+   
+   
 
    // set a system property for the test JVM(s)
    systemProperty 'some.prop', 'value'
 
    // explicitly include or exclude tests
+   useJUnit {
+        includeCategories 'com.google.refine.tests'
+    }
    include 'main/test/server/src'
 
    // show standard out and standard error of the test JVM(s) on the console
@@ -50,6 +56,13 @@
       logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
    }
  }
+ 
+ dependencies {
+    testCompile(
+            'junit:junit:4.12',
+    )
+}
+
 
 
 /*task buildAnt(type: Build, group: "Building", description: "Runs the ant script")
