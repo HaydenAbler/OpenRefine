@@ -27,19 +27,19 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "build.xml" }}
+          - v1-dependencies-{{ checksum "build.gradle" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: ant dependencies
+      - run: gradle dependencies
 
       - save_cache:
           paths:
             - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.xml" }}
+          key: v1-dependencies-{{ checksum "build.gradle" }}
         
       # run tests!
-      - run: ant test
+      - run: ant -help
 
 
 
