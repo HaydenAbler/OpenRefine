@@ -10,17 +10,26 @@
   
   apply plugin: 'java'
   
-  
- 
  sourceSets {
     test {
         java {
-            srcDir  "main/test/server/src"  // Note @Peter's comment below
-        }
-    }
-}
+			srcDirs = ['main/test/server/src']
+		}
+	}
+ }
 
- test {
+/*sourceSet properly
+sourceSets.main.java.srcDirs = ['/main/test/server/src'] 
+
+ task execute(type:JavaExec){
+    
+   main = "com.google.refine.tests.TestMainTask"
+   classpath = sourceSets.main.com.google.refine.tests
+ }*/
+ 
+ 
+
+ /*test {
    
    
 
@@ -55,7 +64,7 @@
    onOutput { descriptor, event ->
       logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
    }
- }
+ }*/
  
  dependencies {
     testCompile(
