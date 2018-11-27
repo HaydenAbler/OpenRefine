@@ -1,4 +1,4 @@
-package com.google.refine.exporters;
+/*package com.google.refine.exporters;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -206,4 +206,4 @@ public class HaydenHtmlTableExporterTest extends HtmlExporterTests {
         }
     }
 
-}
+}*/
