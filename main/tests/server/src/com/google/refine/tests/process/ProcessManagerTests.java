@@ -20,11 +20,11 @@ public class ProcessManagerTests {
 
     }
     
-    @Test
+    /*@Test
     public void serializeProcessManager() throws Exception {
         processManager.queueProcess(process);
         String processJson = JSONUtilities.serialize(process);
         TestUtils.isSerializedTo(processManager, "{"
                 + "\"processes\":["+processJson+"]}");
-    }
+    }*/
 }
